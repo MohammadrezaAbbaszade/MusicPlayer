@@ -22,6 +22,10 @@ public class MusicRepository {
     final Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     final String where = MediaStore.Audio.Media.IS_MUSIC + "!=0";
 
+    public List<Artist> getArtistList() {
+        return mArtistList;
+    }
+
     public static MusicRepository getInstance() {
         if (mInstance == null) {
             mInstance = new MusicRepository();
@@ -90,6 +94,28 @@ public class MusicRepository {
                 MediaStore.Audio.Media.ALBUM_ID + "as text) == " + String.valueOf(albumId);*/
         String where = MediaStore.Audio.Media.IS_MUSIC + "!=0" + " AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + String.valueOf(albumId);
 
+        final Cursor cursor = activity.getContentResolver().query(uri, null, where, null, null);
+        try {
+            if (cursor.getCount() <= 0)
+                return null;
+
+            while (cursor.moveToNext()) {
+                String data = cursor.getString(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                result=data;
+            }
+        } finally {
+            cursor.close();
+        }
+
+
+        return result;
+    }
+    public String getArtistPath(Activity activity,Long artistId) {
+        String result = null;
+/*        String where = MediaStore.Audio.Media.IS_MUSIC + "!= 0 " + " AND " + "cast(" +
+                MediaStore.Audio.Media.ALBUM_ID + "as text) == " + String.valueOf(albumId);*/
+        String where = MediaStore.Audio.Media.IS_MUSIC + "!=0" + " AND " + MediaStore.Audio.Media.ARTIST_ID + "=" + String.valueOf(artistId);
         final Cursor cursor = activity.getContentResolver().query(uri, null, where, null, null);
         try {
             if (cursor.getCount() <= 0)
