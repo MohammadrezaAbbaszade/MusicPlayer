@@ -5,26 +5,20 @@ import android.graphics.Bitmap;
 import java.util.UUID;
 
 public class Album {
-    private UUID mId;
+    private UUID mUUID;
     private Long id;
     private String title;
     private String artist;
     private Bitmap bitmap;
     public Album(UUID uuid) {
-        mId = uuid;
+        mUUID = uuid;
     }
     public Album()
     {
         this(UUID.randomUUID());
     }
 
-    public UUID getId() {
-        return mId;
-    }
 
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getTitle() {
         return title;
@@ -50,7 +44,19 @@ public class Album {
         this.bitmap = bitmap;
     }
 
-    public void setId(UUID id) {
-        mId = id;
+    public UUID getUUID() {
+        return mUUID;
+    }
+
+    public void setUUID(UUID UUID) {
+        mUUID = UUID;
+    }
+
+    public Long getId() {
+        return id;
+    }
+
+    public void setId(Long id) {
+        this.id = id;
     }
 }

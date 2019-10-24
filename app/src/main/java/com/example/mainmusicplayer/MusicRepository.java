@@ -84,7 +84,29 @@ public class MusicRepository {
             cursor.close();
         }
     }
+    public String getAlbumPath(Activity activity,Long albumId) {
+       String result = null;
+/*        String where = MediaStore.Audio.Media.IS_MUSIC + "!= 0 " + " AND " + "cast(" +
+                MediaStore.Audio.Media.ALBUM_ID + "as text) == " + String.valueOf(albumId);*/
+        String where = MediaStore.Audio.Media.IS_MUSIC + "!=0" + " AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + String.valueOf(albumId);
 
+        final Cursor cursor = activity.getContentResolver().query(uri, null, where, null, null);
+        try {
+            if (cursor.getCount() <= 0)
+                return null;
+
+            while (cursor.moveToNext()) {
+                String data = cursor.getString(cursor
+                        .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
+                result=data;
+            }
+        } finally {
+            cursor.close();
+        }
+
+
+        return result;
+    }
     private void setArtistList(String artist, int artistTracks, int artistAlbums, Long artistId, Long albumId) {
         Artist artistModel = new Artist();
         artistModel.setId(artistId);
