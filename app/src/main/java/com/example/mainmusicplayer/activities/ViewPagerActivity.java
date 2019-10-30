@@ -7,6 +7,7 @@ import androidx.appcompat.widget.Toolbar;
 import androidx.core.app.ActivityCompat;
 import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.fragment.app.FragmentPagerAdapter;
 import androidx.fragment.app.FragmentStatePagerAdapter;
 import androidx.viewpager.widget.ViewPager;
 
@@ -34,10 +35,11 @@ public class ViewPagerActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         mViewPager = findViewById(R.id.main_view_pager);
         mToolbar = findViewById(R.id.main_toolbar);
-//        setSupportActionBar(mToolbar);
-        mViewPager.setOffscreenPageLimit(2);
+        setSupportActionBar(mToolbar);
+        getSupportActionBar().setDisplayShowTitleEnabled(false);
+        mViewPager.setOffscreenPageLimit(3);
        checkRequestRresponse();
-        mViewPager.setAdapter(new FragmentStatePagerAdapter(getSupportFragmentManager()) {
+        mViewPager.setAdapter(new FragmentPagerAdapter(getSupportFragmentManager(),0) {
             @NonNull
             @Override
             public Fragment getItem(int position) {

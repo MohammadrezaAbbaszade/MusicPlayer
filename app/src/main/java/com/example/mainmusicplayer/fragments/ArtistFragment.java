@@ -4,6 +4,7 @@ package com.example.mainmusicplayer.fragments;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
@@ -29,6 +30,7 @@ import android.widget.TextView;
 import com.example.mainmusicplayer.MusicRepository;
 import com.example.mainmusicplayer.R;
 import com.example.mainmusicplayer.model.Artist;
+import com.example.mainmusicplayer.utils.PictureUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -179,8 +181,11 @@ public class ArtistFragment extends Fragment {
             MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
             mediaMetadata.setDataSource(MusicRepository.getInstance().getArtistPath(getActivity(), mArtistList.get(position).getId()));
             byte[] imageByte = mediaMetadata.getEmbeddedPicture();
-            if (imageByte != null)
-                holder.mImageView.setImageBitmap(BitmapFactory.decodeByteArray(imageByte, 0, imageByte.length));
+            if (imageByte !=null) {
+                Bitmap bitmap = PictureUtils
+                        .getScaledBitmap(imageByte, getActivity());
+                holder.mImageView.setImageBitmap(bitmap);
+            }
 
         }
 

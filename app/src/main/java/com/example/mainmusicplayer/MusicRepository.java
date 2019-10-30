@@ -26,6 +26,14 @@ public class MusicRepository {
         return mArtistList;
     }
 
+    public Music getMusic(Long id) {
+        for (Music music : mMusicList) {
+            if (music.getID() == id)
+                return music;
+        }
+        return null;
+    }
+
     public static MusicRepository getInstance() {
         if (mInstance == null) {
             mInstance = new MusicRepository();
@@ -88,8 +96,9 @@ public class MusicRepository {
             cursor.close();
         }
     }
-    public String getAlbumPath(Activity activity,Long albumId) {
-       String result = null;
+
+    public String getAlbumPath(Activity activity, Long albumId) {
+        String result = null;
 /*        String where = MediaStore.Audio.Media.IS_MUSIC + "!= 0 " + " AND " + "cast(" +
                 MediaStore.Audio.Media.ALBUM_ID + "as text) == " + String.valueOf(albumId);*/
         String where = MediaStore.Audio.Media.IS_MUSIC + "!=0" + " AND " + MediaStore.Audio.Media.ALBUM_ID + "=" + String.valueOf(albumId);
@@ -102,7 +111,7 @@ public class MusicRepository {
             while (cursor.moveToNext()) {
                 String data = cursor.getString(cursor
                         .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                result=data;
+                result = data;
             }
         } finally {
             cursor.close();
@@ -111,7 +120,8 @@ public class MusicRepository {
 
         return result;
     }
-    public String getArtistPath(Activity activity,Long artistId) {
+
+    public String getArtistPath(Activity activity, Long artistId) {
         String result = null;
 /*        String where = MediaStore.Audio.Media.IS_MUSIC + "!= 0 " + " AND " + "cast(" +
                 MediaStore.Audio.Media.ALBUM_ID + "as text) == " + String.valueOf(albumId);*/
@@ -124,7 +134,7 @@ public class MusicRepository {
             while (cursor.moveToNext()) {
                 String data = cursor.getString(cursor
                         .getColumnIndexOrThrow(MediaStore.Audio.Media.DATA));
-                result=data;
+                result = data;
             }
         } finally {
             cursor.close();
@@ -133,6 +143,7 @@ public class MusicRepository {
 
         return result;
     }
+
     private void setArtistList(String artist, int artistTracks, int artistAlbums, Long artistId, Long albumId) {
         Artist artistModel = new Artist();
         artistModel.setId(artistId);

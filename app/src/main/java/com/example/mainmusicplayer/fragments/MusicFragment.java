@@ -3,6 +3,8 @@ package com.example.mainmusicplayer.fragments;
 
 import android.app.SearchManager;
 import android.content.Context;
+import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
@@ -27,7 +29,9 @@ import android.widget.TextView;
 
 import com.example.mainmusicplayer.MusicRepository;
 import com.example.mainmusicplayer.R;
+import com.example.mainmusicplayer.activities.PlayerActivity;
 import com.example.mainmusicplayer.model.Music;
+import com.example.mainmusicplayer.utils.PictureUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -135,11 +139,12 @@ public class MusicFragment extends Fragment {
             super(itemView);
             mTextViewTitle = itemView.findViewById(R.id.songs_name_tv);
             mTextViewArtistName = itemView.findViewById(R.id.artist_name_tv);
-            cover_image=itemView.findViewById(R.id.cover_image);
+            cover_image = itemView.findViewById(R.id.cover_image);
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    Intent intent = PlayerActivity.newIntent(getActivity(), mMusic.getID());
+                    startActivity(intent);
 
                 }
             });
@@ -183,9 +188,12 @@ public class MusicFragment extends Fragment {
             holder.bindCrime(mMusicsListFiltered.get(position));
             MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
             mediaMetadata.setDataSource(musicList.get(position).getPath());
-            byte [] imageByte = mediaMetadata.getEmbeddedPicture();
-            if (imageByte !=null)
-                holder.cover_image.setImageBitmap(BitmapFactory.decodeByteArray(imageByte , 0 , imageByte.length));
+            byte[] imageByte = mediaMetadata.getEmbeddedPicture();
+            if (imageByte != null) {
+                Bitmap bitmap = PictureUtils
+                        .getScaledBitmap(imageByte, getActivity());
+                holder.cover_image.setImageBitmap(bitmap);
+            }
 
         }
 

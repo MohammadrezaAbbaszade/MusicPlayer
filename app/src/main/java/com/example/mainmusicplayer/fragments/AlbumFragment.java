@@ -4,6 +4,7 @@ package com.example.mainmusicplayer.fragments;
 import android.app.SearchManager;
 import android.content.Context;
 import android.content.Intent;
+import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
@@ -30,6 +31,7 @@ import com.example.mainmusicplayer.MusicRepository;
 import com.example.mainmusicplayer.R;
 import com.example.mainmusicplayer.model.Album;
 import com.example.mainmusicplayer.model.Music;
+import com.example.mainmusicplayer.utils.PictureUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -180,8 +182,12 @@ public class AlbumFragment extends Fragment {
             MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
             mediaMetadata.setDataSource(MusicRepository.getInstance().getAlbumPath(getActivity(),mAlbumList.get(position).getId()));
             byte [] imageByte = mediaMetadata.getEmbeddedPicture();
-            if (imageByte !=null)
-                holder.mCoverIv.setImageBitmap(BitmapFactory.decodeByteArray(imageByte , 0 , imageByte.length));
+            if (imageByte !=null){
+                Bitmap bitmap = PictureUtils
+                        .getScaledBitmap(imageByte, getActivity());
+                holder.mCoverIv.setImageBitmap(bitmap);
+
+            }
 
         }
 
