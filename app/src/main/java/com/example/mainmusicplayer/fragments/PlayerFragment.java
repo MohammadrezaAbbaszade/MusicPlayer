@@ -2,10 +2,7 @@ package com.example.mainmusicplayer.fragments;
 
 
 import android.content.Context;
-import android.graphics.Bitmap;
-import android.media.MediaMetadataRetriever;
 import android.media.MediaPlayer;
-import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.Nullable;
@@ -19,7 +16,6 @@ import android.util.Log;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.CompoundButton;
 import android.widget.SeekBar;
 import android.widget.TextView;
 
@@ -27,12 +23,9 @@ import com.example.mainmusicplayer.MusicRepository;
 import com.example.mainmusicplayer.R;
 import com.example.mainmusicplayer.activities.PlayerActivity;
 import com.example.mainmusicplayer.model.Music;
-import com.example.mainmusicplayer.utils.PictureUtils;
 import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.IOException;
-import java.util.Timer;
-import java.util.TimerTask;
 import java.util.concurrent.TimeUnit;
 
 import de.hdodenhof.circleimageview.CircleImageView;
@@ -50,7 +43,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     private static int oTime = 0, sTime = 0, eTime = 0;
     private TextView mDurationMusicTextView;
     private boolean mRepeateSong = false;
-    private MediaPlayer mMediaPlayer;
+    public static MediaPlayer mMediaPlayer ;
     private FloatingActionButton mActionButton;
     private static boolean mShuffle = false;
     private AppCompatImageButton mNextSongIbtn, mPreviousSongIbtn, mShuffleSongIbtn, mRepeateSongIbtn;
@@ -58,6 +51,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     private AppCompatCheckBox mRepeateAllCheckBox;
     private static final String ID = "id";
     private Long id;
+    private static int musicPlayerTimePosition = 0;
 
     public static PlayerFragment newInstance(Long id) {
 
@@ -79,11 +73,11 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     }
 
     public interface CallBacks {
-        public void nextSong();
+        void nextSong();
 
-        public void previousSong();
+        void previousSong();
 
-        public void repeateList();
+        void repeateList();
     }
 
     @Override
@@ -104,10 +98,12 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         super.onCreate(savedInstanceState);
         id = getArguments().getLong(ID, 0);
         mMusic = MusicRepository.getInstance().getMusic(id);
-        if (mMusic == null)
+        if (mMusic == null){
             Log.d("tag", "mMusic=null");
+        }
         else
             Log.d("tag", "mMmusicNotNull");
+
         mHandler = new Handler();
         mMediaPlayer = new MediaPlayer();
         try {
@@ -128,6 +124,9 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         init(view);
+        if (mMediaPlayer.isPlaying()){
+            clearMediaPlayer();
+        }
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -148,6 +147,9 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                     mActionButton.setImageDrawable(ContextCompat.getDrawable(getActivity(), android.R.drawable.ic_media_play));
                     mSeekBar.setProgress(0);
                 }
+                if (musicPlayerTimePosition > 0){
+                    seekBar.setProgress(musicPlayerTimePosition);
+                }
             }
 
             @Override
@@ -167,9 +169,30 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         mActionButton.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                clearMediaPlayer();
-                startPlaying(mRepeateSong);
-                songsTimeHandler(UpdateSongTime);
+                if (mMediaPlayer == null) mMediaPlayer = new MediaPlayer();
+                if (mMediaPlayer.isPlaying()){
+                    mMediaPlayer.pause();
+                    musicPlayerTimePosition = mMediaPlayer.getCurrentPosition();
+                    mActionButton.setImageResource(R.drawable.ic_play);
+                }else if (musicPlayerTimePosition > 0){
+                    try {
+                        mMediaPlayer.setDataSource(mMusic.getPath());
+                        mMediaPlayer.prepare();
+                        mMediaPlayer.seekTo(musicPlayerTimePosition);
+                        mMediaPlayer.start();
+                        mActionButton.setImageResource(android.R.drawable.ic_media_pause);
+                        musicPlayerTimePosition = 0 ;
+
+                    } catch (IOException e) {
+                        e.printStackTrace();
+                    }
+
+
+                }else {
+                    clearMediaPlayer();
+                    startPlaying(mRepeateSong);
+                    songsTimeHandler(UpdateSongTime);
+                }
             }
         });
         mNextSongIbtn.setOnClickListener(new View.OnClickListener() {
@@ -250,11 +273,15 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     final Runnable UpdateSongTime = new Runnable() {
         @Override
         public void run() {
-            sTime = mMediaPlayer.getCurrentPosition();
-            mSeekBarStatusTv.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(sTime),
-                    TimeUnit.MILLISECONDS.toSeconds(sTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(sTime))));
-            mSeekBar.setProgress(sTime);
-            mHandler.postDelayed(this, 100);
+            try {
+                sTime = mMediaPlayer.getCurrentPosition();
+                mSeekBarStatusTv.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(sTime),
+                        TimeUnit.MILLISECONDS.toSeconds(sTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(sTime))));
+                mSeekBar.setProgress(sTime);
+                mHandler.postDelayed(this, 100);
+            }catch (Exception e){
+
+            }
         }
     };
 
@@ -272,7 +299,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         mSeekBarStatusTv.setText(String.format("%d min, %d sec", TimeUnit.MILLISECONDS.toMinutes(sTime),
                 TimeUnit.MILLISECONDS.toSeconds(sTime) - TimeUnit.MINUTES.toSeconds(TimeUnit.MILLISECONDS.toMinutes(sTime))));
         mSeekBar.setProgress(sTime);
-        mHandler.postDelayed(updateSongTime, 100);
+        mHandler.postDelayed(updateSongTime, 1000);
     }
 
     public void startPlaying(boolean loop) {

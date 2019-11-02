@@ -91,6 +91,10 @@ public class PlayerActivity extends AppCompatActivity implements PlayerFragment.
     @Override
     public void nextSong() {
         if (!mShuffle) {
+            if (PlayerFragment.mMediaPlayer  !=null){
+                PlayerFragment.mMediaPlayer.release();
+                PlayerFragment.mMediaPlayer.stop();
+            }
             int current = mViewPager.getCurrentItem();
             mViewPager.setCurrentItem(current + 1);
         } else
