@@ -48,6 +48,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     private CircleImageView mSongCoverIv;
     private SeekBar mSeekBar;
     private Handler mHandler;
+    private int lengh=0;
     private boolean mWasPlaying = false;
     private static int oTime = 0, sTime = 0, eTime = 0;
     private TextView mDurationMusicTextView;
@@ -121,10 +122,11 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                     setPlayImage();
                     mMediaPlayer.pause();
                     mWasPlaying = false;
+                    lengh=mMediaPlayer.getCurrentPosition();
                 } else {
                     mWasPlaying = true;
                     setPauseImage();
-                    startPlaying(mMusic,mRepeateSong);
+                    startPlaying(mMusic,mRepeateSong,lengh);
                     songsTimeHandler(UpdateSongTime);
                 }
 
@@ -135,7 +137,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
             public void onClick(View view) {
                 int index = MusicRepository.getInstance().getPosition(mMusic.getId());
                 Music music = MusicRepository.getInstance().getMusicList().get(index + 1);
-                startPlaying(music,mRepeateSong);
+                startPlaying(music,mRepeateSong,0);
                 songsTimeHandler(UpdateSongTime);
                 MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
                 mediaMetadata.setDataSource(music.getPath());
@@ -147,6 +149,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                 }
                 mTvSongName.setText(music.getTitle());
                 mTvSongArtist.setText(music.getArtistName());
+                setPauseImage();
 
             }
         });
@@ -155,7 +158,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
             public void onClick(View view) {
                 int index = MusicRepository.getInstance().getPosition(mMusic.getId());
                 Music music = MusicRepository.getInstance().getMusicList().get(index - 1);
-                startPlaying(music,mRepeateSong);
+                startPlaying(music,mRepeateSong,0);
                 songsTimeHandler(UpdateSongTime);
                 MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
                 mediaMetadata.setDataSource(music.getPath());
@@ -167,6 +170,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                 }
                 mTvSongName.setText(music.getTitle());
                 mTvSongArtist.setText(music.getArtistName());
+                setPauseImage();
 
             }
         });
@@ -288,12 +292,13 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         }
     }
 
-    public void startPlaying(Music music,boolean loop) {
+    public void startPlaying(Music music,boolean loop,int lengh) {
         if (mMediaPlayer != null && mMediaPlayer.isPlaying()) {
             mMediaPlayer.stop();
         }
         mMusic = music;
         mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(music.getPath()));
+        mMediaPlayer.seekTo(lengh);
         mMediaPlayer.start();
         mMediaPlayer.setLooping(loop);
         enableSeekBar();

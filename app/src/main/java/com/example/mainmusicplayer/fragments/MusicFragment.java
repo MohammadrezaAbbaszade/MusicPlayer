@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.media.MediaMetadataRetriever;
+import android.net.Uri;
 import android.os.Bundle;
 
 import androidx.annotation.NonNull;
@@ -32,6 +33,7 @@ import com.example.mainmusicplayer.R;
 import com.example.mainmusicplayer.activities.PlayerActivity;
 import com.example.mainmusicplayer.model.Music;
 import com.example.mainmusicplayer.utils.PictureUtils;
+import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -194,6 +196,7 @@ public class MusicFragment extends Fragment {
                         .getScaledBitmap(imageByte, getActivity());
                 holder.cover_image.setImageBitmap(bitmap);
             }
+
 
         }
 
