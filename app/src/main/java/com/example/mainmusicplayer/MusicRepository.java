@@ -13,6 +13,7 @@ import com.example.mainmusicplayer.model.Music;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 public class MusicRepository {
     private static MusicRepository mInstance;
@@ -175,5 +176,13 @@ public class MusicRepository {
 //        music.setBitmap(bitmap);
         mMusicList.add(music);
     }
+    public int getPosition(UUID uuid) {
+        List<Music> musics = getMusicList();
+        for (int i = 0; i < musics.size(); i++) {
+            if (musics.get(i).getId().equals(uuid))
+                return i;
+        }
 
+        return 0;
+    }
 }
