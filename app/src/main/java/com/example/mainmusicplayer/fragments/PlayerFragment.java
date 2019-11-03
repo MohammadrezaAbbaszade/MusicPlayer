@@ -274,21 +274,10 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     @Override
     public void onCompletion(MediaPlayer mediaPlayer) {
         if(mShuffle){
+            clearMediaPlayer();
             Music music = MusicRepository.getInstance().getMusicList().get(randomGenerator());
-            mMusic = music;
-            mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(music.getPath()));
-            mMediaPlayer.start();
-            enableSeekBar();
-            MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
-            mediaMetadata.setDataSource(music.getPath());
-            byte[] imageByte = mediaMetadata.getEmbeddedPicture();
-            if (imageByte != null) {
-                Bitmap bitmap = PictureUtils
-                        .getScaledBitmap(imageByte, getActivity());
-                mSongCoverIv.setImageBitmap(bitmap);
-            }
-            mTvSongName.setText(music.getTitle());
-            mTvSongArtist.setText(music.getArtistName());
+            startPlaying(music,mRepeateSong,0);
+            songsTimeHandler(UpdateSongTime);
         }
     }
 
