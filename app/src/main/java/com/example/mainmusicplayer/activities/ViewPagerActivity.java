@@ -44,7 +44,7 @@ public class ViewPagerActivity extends AppCompatActivity {
             @Override
             public Fragment getItem(int position) {
                 if (position == 0)
-                    return MusicFragment.newInstance();
+                    return MusicFragment.newInstance("all",0l);
                 else if (position == 1)
                     return AlbumFragment.newInstance();
                 else

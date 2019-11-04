@@ -29,6 +29,7 @@ import android.widget.TextView;
 
 import com.example.mainmusicplayer.MusicRepository;
 import com.example.mainmusicplayer.R;
+import com.example.mainmusicplayer.activities.MusicActivity;
 import com.example.mainmusicplayer.model.Album;
 import com.example.mainmusicplayer.model.Music;
 import com.example.mainmusicplayer.utils.PictureUtils;
@@ -137,7 +138,8 @@ public class AlbumFragment extends Fragment {
             itemView.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View view) {
-
+                    Intent intent = MusicActivity.newIntent(getContext(), "album", mAlbum.getId());
+                    startActivity(intent);
                 }
             });
         }

@@ -2,14 +2,19 @@ package com.example.mainmusicplayer;
 
 import android.app.Activity;
 import android.content.ContentResolver;
+import android.content.Context;
 import android.database.Cursor;
 import android.graphics.Bitmap;
+import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.provider.MediaStore;
 
+import com.example.mainmusicplayer.activities.PlayerActivity;
+import com.example.mainmusicplayer.activities.ViewPagerActivity;
 import com.example.mainmusicplayer.model.Album;
 import com.example.mainmusicplayer.model.Artist;
 import com.example.mainmusicplayer.model.Music;
+import com.example.mainmusicplayer.utils.PictureUtils;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -20,6 +25,7 @@ public class MusicRepository {
     private List<Music> mMusicList;
     private List<Album> mAlbumList;
     private List<Artist> mArtistList;
+    private Activity mActivity;
     final Uri uri = MediaStore.Audio.Media.EXTERNAL_CONTENT_URI;
     final String where = MediaStore.Audio.Media.IS_MUSIC + "!=0";
 
@@ -57,7 +63,7 @@ public class MusicRepository {
     }
 
     public void getFiles(Activity activity) {
-
+        mActivity = activity;
         final Cursor cursor = activity.getContentResolver().query(uri,
                 null, where, null, null);
 
@@ -90,7 +96,7 @@ public class MusicRepository {
                 setAlbumList(artist, album, albumId);
 
 
-                setSongList(id, artist, track, data, duration);
+                setSongList(id, artist, artistId, albumId, track, data, duration);
 
             }
         } finally {
@@ -166,16 +172,46 @@ public class MusicRepository {
         mAlbumList.add(albumModel);
     }
 
-    private void setSongList(Long id, String artist, String track, String data, int duration) {
+    private void setSongList(Long id, String artist, Long artistId, Long albumId, String track, String data, int duration) {
         Music music = new Music();
         music.setArtistName(artist);
         music.setID(id);
         music.setTitle(track);
         music.setPath(data);
+        MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
+        mediaMetadata.setDataSource(music.getPath());
+        byte[] imageByte = mediaMetadata.getEmbeddedPicture();
+        if (imageByte != null) {
+            Bitmap bitmap = PictureUtils
+                    .getScaledBitmap(imageByte, mActivity);
+            music.setBitmap(bitmap);
+        }
         music.setTime(duration);
+        music.setArtistId(artistId);
+        music.setAlbumId(albumId);
 //        music.setBitmap(bitmap);
         mMusicList.add(music);
     }
+
+    public List<Music> getSongListByArtist(Long artistiD) {
+
+        List<Music> result = new ArrayList<>();
+        for (Music music : mMusicList) {
+            if (music.getArtistId().equals(artistiD))
+                result.add(music);
+        }
+        return result;
+    }
+
+    public List<Music> getSongListByAlbum(Long albumId) {
+        List<Music> result = new ArrayList<>();
+        for (Music music : mMusicList) {
+            if (music.getAlbumId().equals(albumId))
+                result.add(music);
+        }
+        return result;
+    }
+
     public int getPosition(UUID uuid) {
         List<Music> musics = getMusicList();
         for (int i = 0; i < musics.size(); i++) {

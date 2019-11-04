@@ -9,7 +9,8 @@
         android:roundIcon="@mipmap/ic_launcher_round"
         android:supportsRtl="true"
         android:theme="@style/Theme.AppCompat.NoActionBar">
-        <activity android:name=".activities.PlayerActivity"></activity>
+        <activity android:name=".activities.MusicActivity"></activity>
+        <activity android:name=".activities.PlayerActivity" />
         <activity android:name=".activities.ViewPagerActivity">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN" />

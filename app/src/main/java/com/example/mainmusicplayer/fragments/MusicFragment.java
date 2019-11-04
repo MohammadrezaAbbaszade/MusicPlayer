@@ -44,16 +44,21 @@ import java.util.List;
  */
 public class MusicFragment extends Fragment {
     private SearchView mSearchView;
+    private String state;
+    private Long id;
     private SearchView.OnQueryTextListener queryTextListener;
     private Music mMusic;
     List<Music> musicList;
     private RecyclerView mRecyclerView;
     private MusicAdapter mMusicAdapter;
+    private static final String STATUS_ARGS = "status_args";
+    private static final String ID_ARGS = "id_args";
 
-    public static MusicFragment newInstance() {
+    public static MusicFragment newInstance(String state, Long id) {
 
         Bundle args = new Bundle();
-
+        args.putString(STATUS_ARGS, state);
+        args.putLong(ID_ARGS, id);
         MusicFragment fragment = new MusicFragment();
         fragment.setArguments(args);
         return fragment;
@@ -110,7 +115,9 @@ public class MusicFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
-
+        state = getArguments().getString(STATUS_ARGS, "");
+        id = getArguments().getLong(ID_ARGS, 0);
+        musicList = MusicRepository.getInstance().getMusicList();
     }
 
     @Override
@@ -155,6 +162,7 @@ public class MusicFragment extends Fragment {
         public void bindCrime(Music music) {
             mTextViewTitle.setText(music.getTitle());
             mTextViewArtistName.setText(music.getArtistName());
+            cover_image.setImageBitmap(music.getBitmap());
             mMusic = music;
         }
     }
@@ -185,18 +193,7 @@ public class MusicFragment extends Fragment {
 
         @Override
         public void onBindViewHolder(@NonNull MusicHolder holder, int position) {
-
-
             holder.bindCrime(mMusicsListFiltered.get(position));
-            MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
-            mediaMetadata.setDataSource(musicList.get(position).getPath());
-            byte[] imageByte = mediaMetadata.getEmbeddedPicture();
-            if (imageByte != null) {
-                Bitmap bitmap = PictureUtils
-                        .getScaledBitmap(imageByte, getActivity());
-                holder.cover_image.setImageBitmap(bitmap);
-            }
-
 
         }
 
@@ -242,13 +239,16 @@ public class MusicFragment extends Fragment {
     }
 
     public void updateUI() {
-        musicList = MusicRepository.getInstance().getMusicList();
-        if (mMusicAdapter == null) {
-            mMusicAdapter = new MusicAdapter(musicList);
+
+        if (state.equalsIgnoreCase("album")) {
+            mMusicAdapter = new MusicAdapter(MusicRepository.getInstance().getSongListByAlbum(id));
+            mRecyclerView.setAdapter(mMusicAdapter);
+        } else if (state.equalsIgnoreCase("artist")) {
+            mMusicAdapter = new MusicAdapter(MusicRepository.getInstance().getSongListByArtist(id));
             mRecyclerView.setAdapter(mMusicAdapter);
         } else {
-            mMusicAdapter.setCrimes(musicList);
-            mMusicAdapter.notifyDataSetChanged();
+            mMusicAdapter = new MusicAdapter(musicList);
+            mRecyclerView.setAdapter(mMusicAdapter);
         }
 
     }

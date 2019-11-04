@@ -6,6 +6,8 @@ import java.util.UUID;
 
 public class Music {
     private Long mID;
+    private Long mArtistId;
+    private Long mAlbumId;
     private UUID mId;
     private String mTitle;
     private String mAlbumName;
@@ -19,6 +21,22 @@ public class Music {
     public Music()
     {
         this(UUID.randomUUID());
+    }
+
+    public Long getAlbumId() {
+        return mAlbumId;
+    }
+
+    public void setAlbumId(Long albumId) {
+        mAlbumId = albumId;
+    }
+
+    public Long getArtistId() {
+        return mArtistId;
+    }
+
+    public void setArtistId(Long artistId) {
+        mArtistId = artistId;
     }
 
     public Long getID() {
