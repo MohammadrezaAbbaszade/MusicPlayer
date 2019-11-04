@@ -153,7 +153,6 @@ public class AlbumFragment extends Fragment {
         }
 
         public void bindCrime(Album album) {
-//            mCoverIv.setImageBitmap(album.getBitmap());
             mArtistTv.setText(album.getArtist());
             mAlbumTv.setText(album.getTitle());
             mAlbum = album;
@@ -204,15 +203,6 @@ public class AlbumFragment extends Fragment {
 
 
             holder.bindCrime(mAlbumsListFiltered.get(position));
-//            MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
-//            mediaMetadata.setDataSource(MusicRepository.getInstance().getAlbumPath(getActivity(),mAlbumList.get(position).getId()));
-//            byte [] imageByte = mediaMetadata.getEmbeddedPicture();
-//            if (imageByte !=null){
-//                Bitmap bitmap = PictureUtils
-//                        .getScaledBitmap(imageByte, getActivity());
-//                holder.mCoverIv.setImageBitmap(bitmap);
-//
-//            }
 
         }
 
