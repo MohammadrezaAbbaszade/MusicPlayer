@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.net.Uri;
 import android.os.Bundle;
@@ -16,6 +18,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.LinearLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +36,7 @@ import com.example.mainmusicplayer.R;
 import com.example.mainmusicplayer.activities.PlayerActivity;
 import com.example.mainmusicplayer.model.Music;
 import com.example.mainmusicplayer.utils.PictureUtils;
+import com.example.mainmusicplayer.utils.ThumbnailLoader;
 import com.squareup.picasso.Picasso;
 
 import java.util.ArrayList;
@@ -43,6 +47,7 @@ import java.util.List;
  * A simple {@link Fragment} subclass.
  */
 public class MusicFragment extends Fragment {
+    private ThumbnailLoader mThumbnailLoader;
     private SearchView mSearchView;
     private String state;
     private Long id;
@@ -118,6 +123,11 @@ public class MusicFragment extends Fragment {
         state = getArguments().getString(STATUS_ARGS, "");
         id = getArguments().getLong(ID_ARGS, 0);
         musicList = MusicRepository.getInstance().getMusicList();
+        Handler handler = new Handler();
+
+        mThumbnailLoader = new ThumbnailLoader(handler,getActivity());
+        mThumbnailLoader.start();
+        mThumbnailLoader.getLooper();
     }
 
     @Override
@@ -162,24 +172,39 @@ public class MusicFragment extends Fragment {
         public void bindCrime(Music music) {
             mTextViewTitle.setText(music.getTitle());
             mTextViewArtistName.setText(music.getArtistName());
-            cover_image.setImageBitmap(music.getBitmap());
             mMusic = music;
+                Drawable drawable = getContext().getResources().getDrawable(R.drawable.ic_music);
+                cover_image.setImageDrawable(drawable);
+                //queue msg for downloading thumbnail
+                mThumbnailLoader.queueThumbnail(music.getPath(), this);
+        }
+        public void bindDrawable(Bitmap bitmap) {
+            Drawable drawable = new BitmapDrawable(getResources(),bitmap);
+            cover_image.setImageDrawable(drawable);
         }
     }
 
     private class MusicAdapter extends RecyclerView.Adapter<MusicHolder> implements Filterable {
-
+        private ThumbnailLoader<MusicHolder> mThumbnailLoader;
         private List<Music> mMusics;
         private List<Music> mMusicsListFiltered;
 
-        public MusicAdapter(List<Music> musics) {
+        public MusicAdapter(List<Music> musics,ThumbnailLoader thumbnailLoader) {
             mMusics = musics;
             mMusicsListFiltered = musics;
+            mThumbnailLoader = thumbnailLoader;
+            mThumbnailLoader.setThumbnailDownloaderListener(new ThumbnailLoader.ThumbnailDownloaderListener<MusicHolder>() {
+                @Override
+                public void onThumbnailDownloaded(MusicHolder target, Bitmap bitmap) {
+                    target.bindDrawable(bitmap);
+                }
+            });
         }
 
         public void setCrimes(List<Music> musics) {
             mMusics = musics;
             mMusicsListFiltered = musics;
+
         }
 
         @NonNull
@@ -241,16 +266,21 @@ public class MusicFragment extends Fragment {
     public void updateUI() {
 
         if (state.equalsIgnoreCase("album")) {
-            mMusicAdapter = new MusicAdapter(MusicRepository.getInstance().getSongListByAlbum(id));
+            mMusicAdapter = new MusicAdapter(MusicRepository.getInstance().getSongListByAlbum(id),mThumbnailLoader);
             mRecyclerView.setAdapter(mMusicAdapter);
         } else if (state.equalsIgnoreCase("artist")) {
-            mMusicAdapter = new MusicAdapter(MusicRepository.getInstance().getSongListByArtist(id));
+            mMusicAdapter = new MusicAdapter(MusicRepository.getInstance().getSongListByArtist(id),mThumbnailLoader);
             mRecyclerView.setAdapter(mMusicAdapter);
         } else {
-            mMusicAdapter = new MusicAdapter(musicList);
+            mMusicAdapter = new MusicAdapter(musicList,mThumbnailLoader);
             mRecyclerView.setAdapter(mMusicAdapter);
         }
 
     }
 
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mThumbnailLoader.clearQueue();
+    }
 }

@@ -27,4 +27,5 @@ public class PictureUtils {
         activity.getWindowManager().getDefaultDisplay().getSize(point);
         return getScaledBitmap(path, point.x/24, point.y/24);
     }
+
 }

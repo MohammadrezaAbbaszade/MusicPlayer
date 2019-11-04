@@ -180,14 +180,14 @@ public class ArtistFragment extends Fragment {
 
 
             holder.bindCrime(mArtistsListFiltered.get(position));
-            MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
-            mediaMetadata.setDataSource(MusicRepository.getInstance().getArtistPath(getActivity(), mArtistList.get(position).getId()));
-            byte[] imageByte = mediaMetadata.getEmbeddedPicture();
-            if (imageByte != null) {
-                Bitmap bitmap = PictureUtils
-                        .getScaledBitmap(imageByte, getActivity());
-                holder.mImageView.setImageBitmap(bitmap);
-            }
+//            MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
+//            mediaMetadata.setDataSource(MusicRepository.getInstance().getArtistPath(getActivity(), mArtistList.get(position).getId()));
+//            byte[] imageByte = mediaMetadata.getEmbeddedPicture();
+//            if (imageByte != null) {
+//                Bitmap bitmap = PictureUtils
+//                        .getScaledBitmap(imageByte, getActivity());
+//                holder.mImageView.setImageBitmap(bitmap);
+//            }
 
         }
 

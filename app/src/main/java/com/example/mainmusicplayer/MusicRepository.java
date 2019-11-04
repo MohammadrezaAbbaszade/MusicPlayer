@@ -178,14 +178,7 @@ public class MusicRepository {
         music.setID(id);
         music.setTitle(track);
         music.setPath(data);
-        MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
-        mediaMetadata.setDataSource(music.getPath());
-        byte[] imageByte = mediaMetadata.getEmbeddedPicture();
-        if (imageByte != null) {
-            Bitmap bitmap = PictureUtils
-                    .getScaledBitmap(imageByte, mActivity);
-            music.setBitmap(bitmap);
-        }
+
         music.setTime(duration);
         music.setArtistId(artistId);
         music.setAlbumId(albumId);
