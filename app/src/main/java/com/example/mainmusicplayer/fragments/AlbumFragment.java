@@ -6,6 +6,8 @@ import android.content.Context;
 import android.content.Intent;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
+import android.graphics.drawable.BitmapDrawable;
+import android.graphics.drawable.Drawable;
 import android.media.MediaMetadataRetriever;
 import android.os.Bundle;
 
@@ -15,6 +17,7 @@ import androidx.fragment.app.Fragment;
 import androidx.recyclerview.widget.GridLayoutManager;
 import androidx.recyclerview.widget.RecyclerView;
 
+import android.os.Handler;
 import android.view.LayoutInflater;
 import android.view.Menu;
 import android.view.MenuInflater;
@@ -33,6 +36,7 @@ import com.example.mainmusicplayer.activities.MusicActivity;
 import com.example.mainmusicplayer.model.Album;
 import com.example.mainmusicplayer.model.Music;
 import com.example.mainmusicplayer.utils.PictureUtils;
+import com.example.mainmusicplayer.utils.ThumbnailLoader;
 
 import java.util.ArrayList;
 import java.util.List;
@@ -48,7 +52,7 @@ public class AlbumFragment extends Fragment {
     List<Album> mAlbumList;
     private RecyclerView mRecyclerView;
     private AlbumAdaptor mAlbumAdapter;
-
+    private ThumbnailLoader mThumbnailLoader;
     public static AlbumFragment newInstance() {
 
         Bundle args = new Bundle();
@@ -109,7 +113,11 @@ public class AlbumFragment extends Fragment {
     public void onCreate(@Nullable Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setHasOptionsMenu(true);
+        Handler handler = new Handler();
 
+        mThumbnailLoader = new ThumbnailLoader(handler,getActivity());
+        mThumbnailLoader.start();
+        mThumbnailLoader.getLooper();
     }
 
     @Override
@@ -149,17 +157,32 @@ public class AlbumFragment extends Fragment {
             mArtistTv.setText(album.getArtist());
             mAlbumTv.setText(album.getTitle());
             mAlbum = album;
+            Drawable drawable = getContext().getResources().getDrawable(R.drawable.ic_music);
+            mCoverIv.setImageDrawable(drawable);
+            //queue msg for downloading thumbnail
+            mThumbnailLoader.queueThumbnail(MusicRepository.getInstance().getAlbumPath(getActivity(),album.getId()), this);
+        }
+        public void bindDrawable(Bitmap bitmap) {
+            Drawable drawable = new BitmapDrawable(getResources(),bitmap);
+            mCoverIv.setImageDrawable(drawable);
         }
     }
 
     private class AlbumAdaptor extends RecyclerView.Adapter<AlbumHolder> implements Filterable {
-
+        private ThumbnailLoader<AlbumHolder> mThumbnailLoader;
         private List<Album> mAlbums;
         private List<Album> mAlbumsListFiltered;
 
-        public AlbumAdaptor(List<Album> musics) {
+        public AlbumAdaptor(List<Album> musics,ThumbnailLoader thumbnailLoader) {
             mAlbums = musics;
             mAlbumsListFiltered = musics;
+            mThumbnailLoader = thumbnailLoader;
+            mThumbnailLoader.setThumbnailDownloaderListener(new ThumbnailLoader.ThumbnailDownloaderListener<AlbumHolder>() {
+                @Override
+                public void onThumbnailDownloaded(AlbumHolder target, Bitmap bitmap) {
+                    target.bindDrawable(bitmap);
+                }
+            });
         }
 
         public void setCrimes(List<Album> musics) {
@@ -237,11 +260,16 @@ public class AlbumFragment extends Fragment {
     public void updateUI() {
         mAlbumList = MusicRepository.getInstance().getAlbumList();
         if (mAlbumAdapter == null) {
-            mAlbumAdapter = new AlbumAdaptor(mAlbumList);
+            mAlbumAdapter = new AlbumAdaptor(mAlbumList,mThumbnailLoader);
             mRecyclerView.setAdapter(mAlbumAdapter);
         } else {
             mAlbumAdapter.setCrimes(mAlbumList);
             mAlbumAdapter.notifyDataSetChanged();
         }
+    }
+    @Override
+    public void onDestroy() {
+        super.onDestroy();
+        mThumbnailLoader.clearQueue();
     }
 }
