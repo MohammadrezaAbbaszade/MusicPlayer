@@ -92,7 +92,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         mHandler = new Handler();
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(mMusic.getPath()));
-
+        Log.d("tag","onCreate");
 
 
     }
@@ -104,10 +104,13 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     @Override
     public void onResume() {
         super.onResume();
-        mWasPlaying = true;
-        setPauseImage();
-        startPlaying(mMusic, mRepeateSong, lengh);
-        songsTimeHandler(UpdateSongTime);
+        if(mMediaPlayer!=null&&!mMediaPlayer.isPlaying()) {
+            mWasPlaying = true;
+            setPauseImage();
+            startPlaying(mMusic, mRepeateSong, lengh);
+            songsTimeHandler(UpdateSongTime);
+        }
+        Log.d("tag","onResume");
     }
 
     @Override
@@ -115,6 +118,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         super.onDestroy();
         clearMediaPlayer();
         mHandler.removeCallbacks(UpdateSongTime);
+        Log.d("tag","onDestroy");
     }
 
     @Override
@@ -123,6 +127,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         init(view);
+        Log.d("tag","onCreateView");
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -131,7 +136,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                 if (fromUser) {
                     mMediaPlayer.seekTo(progress);
                     mSeekBar.setProgress(progress);
-               }
+                }
 
             }
 
@@ -182,7 +187,9 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                 mHandler.removeCallbacks(UpdateSongTime);
                 mHandler = new Handler();
                 int index = MusicRepository.getInstance().getPosition(mMusic.getId());
-                Music music = MusicRepository.getInstance().getMusicList().get(index + 1);
+
+                Music music = MusicRepository.getInstance().getMusicList().get((++index) % MusicRepository.getInstance().getMusicList()
+                        .size());
                 startPlaying(music, mRepeateSong, 0);
                 songsTimeHandler(UpdateSongTime);
                 MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
@@ -206,7 +213,9 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                 mHandler.removeCallbacks(UpdateSongTime);
                 mHandler = new Handler();
                 int index = MusicRepository.getInstance().getPosition(mMusic.getId());
-                Music music = MusicRepository.getInstance().getMusicList().get(index - 1);
+                Music music = MusicRepository.getInstance().getMusicList().get((index - 1 + MusicRepository.getInstance().getMusicList()
+                        .size()) % MusicRepository.getInstance().getMusicList()
+                        .size());
                 startPlaying(music, mRepeateSong, 0);
                 songsTimeHandler(UpdateSongTime);
                 MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
@@ -291,10 +300,11 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         songsTimeHandler(UpdateSongTime);
 
     }
+
     @Override
     public void setUserVisibleHint(boolean isVisibleToUser) {
         super.setUserVisibleHint(isVisibleToUser);
-            clearMediaPlayer();
+        clearMediaPlayer();
     }
 
     public void startPlaying(Music music, boolean loop, int lengh) {
@@ -304,12 +314,10 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         mMusic = music;
         mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(music.getPath()));
 
-        if(lengh==0)
-        {
+        if (lengh == 0) {
             mMediaPlayer.seekTo(0);
             mSeekBar.setProgress(0);
-        }else
-        {
+        } else {
             mMediaPlayer.seekTo(mSeekBar.getProgress());
         }
         mMediaPlayer.setLooping(loop);
@@ -338,6 +346,12 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         if (mMediaPlayer != null) {
             mMediaPlayer.stop();
         }
+    }
+
+    @Override
+    public void onPause() {
+        super.onPause();
+        Log.d("tag","onPause");
     }
 
     private int randomGenerator() {
