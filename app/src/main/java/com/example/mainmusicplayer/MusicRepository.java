@@ -35,7 +35,7 @@ public class MusicRepository {
 
     public Music getMusic(Long id) {
         for (Music music : mMusicList) {
-            if (music.getID() == id)
+            if (music.getID().equals(id))
                 return music;
         }
         return null;

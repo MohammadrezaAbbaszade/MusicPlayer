@@ -42,8 +42,8 @@ public class PlayerActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        Long id=(Long) getIntent().getSerializableExtra(ID_EXTRA);
         setContentView(R.layout.activity_player);
+        Long id= getIntent().getLongExtra(ID_EXTRA,0);
         FragmentManager fm=getSupportFragmentManager();
         Fragment fragment=fm.findFragmentById(R.id.player_activity_container);
             fm.beginTransaction().replace(R.id.player_activity_container,PlayerFragment.newInstance(id))
