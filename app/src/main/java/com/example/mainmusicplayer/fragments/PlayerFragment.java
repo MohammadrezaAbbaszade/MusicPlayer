@@ -92,7 +92,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         mHandler = new Handler();
         mMediaPlayer = new MediaPlayer();
         mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(mMusic.getPath()));
-        Log.d("tag","onCreate");
+        Log.d("tag", "onCreate");
 
 
     }
@@ -104,13 +104,13 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     @Override
     public void onResume() {
         super.onResume();
-        if(mMediaPlayer!=null&&!mMediaPlayer.isPlaying()) {
+        if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             mWasPlaying = true;
             setPauseImage();
             startPlaying(mMusic, mRepeateSong, lengh);
             songsTimeHandler(UpdateSongTime);
         }
-        Log.d("tag","onResume");
+        Log.d("tag", "onResume");
     }
 
     @Override
@@ -118,7 +118,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         super.onDestroy();
         clearMediaPlayer();
         mHandler.removeCallbacks(UpdateSongTime);
-        Log.d("tag","onDestroy");
+        Log.d("tag", "onDestroy");
     }
 
     @Override
@@ -127,7 +127,8 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         // Inflate the layout for this fragment
         View view = inflater.inflate(R.layout.fragment_player, container, false);
         init(view);
-        Log.d("tag","onCreateView");
+        Log.d("tag", "onCreateView");
+
         mSeekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
             public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
@@ -137,7 +138,12 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                     mMediaPlayer.seekTo(progress);
                     mSeekBar.setProgress(progress);
                 }
-
+                if (mSeekBar.getProgress() == mSeekBar.getMax()) {
+                    Log.d("tag", "onCompletion");
+                    if(!mRepeateSong) {
+                        onCompeleteSong();
+                    }
+                }
             }
 
             @Override
@@ -351,7 +357,49 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     @Override
     public void onPause() {
         super.onPause();
-        Log.d("tag","onPause");
+        Log.d("tag", "onPause");
+    }
+
+    private void onCompeleteSong() {
+        clearMediaPlayer();
+        mHandler.removeCallbacks(UpdateSongTime);
+        mHandler = new Handler();
+
+        int index = MusicRepository.getInstance().getPosition(mMusic.getId());
+        if (mShuffle&&!mRepeateSong) {
+            Music music = MusicRepository.getInstance().getMusicList().get(randomGenerator());
+            startPlaying(music, mRepeateSong, 0);
+            songsTimeHandler(UpdateSongTime);
+            MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
+            mediaMetadata.setDataSource(music.getPath());
+            byte[] imageByte = mediaMetadata.getEmbeddedPicture();
+            if (imageByte != null) {
+                Bitmap bitmap = PictureUtils
+                        .getScaledBitmap(imageByte, getActivity());
+                mSongCoverIv.setImageBitmap(bitmap);
+            }
+            mTvSongName.setText(music.getTitle());
+            mTvSongArtist.setText(music.getArtistName());
+            setPauseImage();
+        } else if(!mShuffle&&!mRepeateSong) {
+            Music music = MusicRepository.getInstance().getMusicList().get((++index) % MusicRepository.getInstance().getMusicList()
+                    .size());
+            startPlaying(music, mRepeateSong, 0);
+            songsTimeHandler(UpdateSongTime);
+            MediaMetadataRetriever mediaMetadata = new MediaMetadataRetriever();
+            mediaMetadata.setDataSource(music.getPath());
+            byte[] imageByte = mediaMetadata.getEmbeddedPicture();
+            if (imageByte != null) {
+                Bitmap bitmap = PictureUtils
+                        .getScaledBitmap(imageByte, getActivity());
+                mSongCoverIv.setImageBitmap(bitmap);
+            }
+            mTvSongName.setText(music.getTitle());
+            mTvSongArtist.setText(music.getArtistName());
+            setPauseImage();
+        }
+
+
     }
 
     private int randomGenerator() {
