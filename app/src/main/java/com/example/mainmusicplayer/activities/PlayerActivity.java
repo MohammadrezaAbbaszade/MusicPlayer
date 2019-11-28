@@ -46,7 +46,9 @@ public class PlayerActivity extends AppCompatActivity {
         Long id= getIntent().getLongExtra(ID_EXTRA,0);
         FragmentManager fm=getSupportFragmentManager();
         Fragment fragment=fm.findFragmentById(R.id.player_activity_container);
-            fm.beginTransaction().replace(R.id.player_activity_container,PlayerFragment.newInstance(id))
-            .commit();
+        if(fragment==null) {
+            fm.beginTransaction().replace(R.id.player_activity_container, PlayerFragment.newInstance(id))
+                    .commit();
+        }
     }
 }
