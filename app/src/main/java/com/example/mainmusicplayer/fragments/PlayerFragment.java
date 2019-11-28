@@ -89,9 +89,18 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
         super.onCreate(savedInstanceState);
         Long id = getArguments().getLong(ID);
         mMusic = MusicRepository.getInstance().getMusic(id);
-        mHandler = new Handler();
-        mMediaPlayer = new MediaPlayer();
-        mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(mMusic.getPath()));
+        if(mMediaPlayer!=null&&mMediaPlayer.isPlaying())
+        {
+            clearMediaPlayer();
+            mHandler = new Handler();
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(mMusic.getPath()));
+        }else {
+            mHandler = new Handler();
+            mMediaPlayer = new MediaPlayer();
+            mMediaPlayer = MediaPlayer.create(getContext(), Uri.parse(mMusic.getPath()));
+        }
+
         Log.d("tag", "onCreate");
 
 
@@ -104,19 +113,20 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
     @Override
     public void onResume() {
         super.onResume();
+
         if (mMediaPlayer != null && !mMediaPlayer.isPlaying()) {
             mWasPlaying = true;
             setPauseImage();
             startPlaying(mMusic, mRepeateSong, lengh);
             songsTimeHandler(UpdateSongTime);
         }
+
         Log.d("tag", "onResume");
     }
 
     @Override
     public void onDestroy() {
         super.onDestroy();
-        clearMediaPlayer();
         mHandler.removeCallbacks(UpdateSongTime);
         Log.d("tag", "onDestroy");
     }
@@ -138,7 +148,7 @@ public class PlayerFragment extends Fragment implements MediaPlayer.OnCompletion
                     mMediaPlayer.seekTo(progress);
                     mSeekBar.setProgress(progress);
                 }
-                if (mSeekBar.getProgress() == mSeekBar.getMax()) {
+                if (mSeekBar.getProgress() == mMediaPlayer.getDuration()) {
                     Log.d("tag", "onCompletion");
                     if(!mRepeateSong) {
                         onCompeleteSong();
